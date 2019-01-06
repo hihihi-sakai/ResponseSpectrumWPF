@@ -16,7 +16,7 @@ Feature
 GUI is in Japanese...
 
 Prepare data one value(acceleration) per one line.
-
+~~~
 % [m/s2] ----> '%'' is comment line
 0.00000000
 0.00005533
@@ -24,6 +24,7 @@ Prepare data one value(acceleration) per one line.
 0.00025011
 0.00027940
 ...
+~~~
 
 ## Demo
 
