@@ -27,6 +27,7 @@ Prepare data one value(acceleration) per one line.
 ~~~
 
 ## Demo
+![input](assets/input.png)
 
 
 ## Requirement
