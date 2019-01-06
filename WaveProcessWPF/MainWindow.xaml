@@ -1,0 +1,192 @@
+﻿<Window
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WaveProcessWPF" x:Name="window"
+        x:Class="WaveProcessWPF.MainWindow"
+        mc:Ignorable="d"
+        Title="Response Spectrum" SizeToContent="Height" ResizeMode="NoResize" Width="300" Closing="Window_Closing">
+    <Window.Resources>
+        <local:EnumBooleanConverter x:Key="EnumBooleanConverter"/>
+        <Style TargetType="TextBox">
+            <Style.Triggers>
+                <Trigger Property="Validation.HasError" Value="True">
+                    <Setter Property="ToolTip" Value="{Binding RelativeSource={RelativeSource Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+                    <Setter Property="Background" Value="#ffeeff" />
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+    <Window.DataContext>
+        <local:RespSpectrumViewModel/>
+    </Window.DataContext>
+    <StackPanel>
+        <Menu VerticalAlignment="Top" >
+            <MenuItem Header="フォルダ選択" Command="{Binding SelectOutputFolderCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}" />
+            <MenuItem Header="データ読み込み" Command="{Binding ReadWavesCommand, Mode=OneWay}"  CommandParameter="{Binding ElementName=window, Mode=OneWay}"/>
+            <MenuItem Header="実行" Command="{Binding CalculateCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"/>
+            <MenuItem Header="結果" Command="{Binding ShowResultCommand, Mode=OneWay}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"/>
+        </Menu>
+        <GroupBox Header="Output Folder">
+            <TextBox Grid.Row="1" Text="{Binding OutputFolder}" Height="19" VerticalAlignment="Bottom" />
+        </GroupBox>
+        <Expander x:Name="WaveExpander" Header="Wave" >
+            <StackPanel>
+                <!--<Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition Width="2*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="Sampling period" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding SamplingPeriod, Mode=TwoWay, StringFormat=\{0:F\}}" />
+                    <Label Content="s" Grid.Column="2" />
+                </Grid>-->
+                <ListView x:Name="WaveListView" MinHeight="100" ItemsSource="{Binding Waves, Mode=TwoWay}" MaxHeight="300" SelectionMode="Single" SelectionChanged="WaveListView_SelectionChanged" >
+                    <ListView.Resources>
+                        <ContextMenu x:Key="ItemMenu">
+                            <!--<MenuItem Header="Add" Command="{Binding ReadWavesCommand, Mode=OneWay}" />
+                                    <Separator/>-->
+                            <MenuItem Header="Show" 
+                                      Command="{Binding DataContext.ShowWaveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=ListView}, Mode=OneWay}" 
+                                      CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType=ListView}}" />
+                            <MenuItem Header="Delete" 
+                                      Command="{Binding DataContext.DeleteWaveCommand, RelativeSource={RelativeSource FindAncestor, AncestorType=ListView}, Mode=OneWay}" 
+                                      CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType=ListView}}" />
+                        </ContextMenu>
+                    </ListView.Resources>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="ContextMenu" Value="{StaticResource ResourceKey=ItemMenu}"/>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="Add" Command="{Binding ReadWavesCommand, Mode=OneWay}" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.View>
+                        <GridView>
+                            <GridViewColumn Header="名前" DisplayMemberBinding="{Binding Name}"   />
+                            <GridViewColumn Header="データ数" DisplayMemberBinding="{Binding Data.Count, Mode=OneWay}" />
+                            <GridViewColumn Header="時間間隔[s]" DisplayMemberBinding="{Binding Dt, Mode=OneWay}" />
+                        </GridView>
+                    </ListView.View>
+                    <ListView.InputBindings>
+                        <KeyBinding Gesture="Delete" Command="{Binding DeleteWaveCommand}" 
+                                    CommandParameter="{Binding SelectedItem, 
+                            RelativeSource={RelativeSource FindAncestor, AncestorType=ListView}}"></KeyBinding>
+                    </ListView.InputBindings>
+                </ListView>
+            </StackPanel>
+        </Expander>
+        <Expander x:Name="DampingExpender" Header="Damping Coefficient" >
+            <Grid >
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <ListBox x:Name="DampingListBox" Grid.Column="3" ItemsSource="{Binding Hs}" MaxHeight="300" >
+                    <ListBox.ContextMenu>
+                        <ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}" >
+                            <MenuItem Header="Delete" Command="{Binding Path=DataContext.DeleteDampingCommand}" 
+                                      CommandParameter="{Binding SelectedItem}"/>
+                        </ContextMenu>
+                    </ListBox.ContextMenu>
+                    <ListBox.InputBindings>
+                        <KeyBinding Gesture="Delete" Command="{Binding Path=DeleteDampingCommand}" 
+                                    CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType=ListBox}}"></KeyBinding>
+                    </ListBox.InputBindings>
+                </ListBox>
+                <TextBox x:Name="HAddingTextBox" Grid.Column="0" VerticalContentAlignment="Center" 
+                         VerticalAlignment="Center" HorizontalContentAlignment="Stretch" 
+                         Text="{Binding HInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" >
+                    <TextBox.InputBindings>
+                        <KeyBinding Gesture="Enter" Command="{Binding AddDampingCommand}" 
+                                    CommandParameter="{Binding ElementName=HAddingTextBox, Path=Text}"/>
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Button Content="Add" Grid.Column="1" VerticalAlignment="Center" Margin="10,0" 
+                        Command="{Binding AddDampingCommand, Mode=OneWay}" CommandParameter="{Binding Text, ElementName=HAddingTextBox}" />
+            </Grid>
+        </Expander>
+        <Expander x:Name="FrequencyExpander" Header="Frequency Pitch">
+            <StackPanel>
+                <GroupBox Header="Time/Period" >
+                    <StackPanel >
+                        <RadioButton GroupName="PlotTypeFrequencyMainWindow" Content="振動数[Hz]" IsChecked="{Binding  PlotType, ConverterParameter=Frequency, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}"  />
+                        <RadioButton GroupName="PlotTypeSecondMainWindow" Content="周期[s]" IsChecked="{Binding PlotType, ConverterParameter=Second, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" />
+                    </StackPanel>
+                </GroupBox>
+                <GroupBox Header="Divide method" >
+                    <StackPanel >
+                        <RadioButton GroupName="XAxisTypeLinerMainWindow" Content="線形均等分割" IsChecked="{Binding  XAxisType, ConverterParameter=Liner, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}"  />
+                        <RadioButton GroupName="XAxisTypeLogarithmicMainWindow" Content="対数均等分割" IsChecked="{Binding XAxisType, ConverterParameter=Logarithmic, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" />
+                    </StackPanel>
+                </GroupBox>
+                <Grid Visibility="{Binding IsVisibleFrequency, Mode=OneWay}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="最小振動数" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding MinFreq}" />
+                    <Label Grid.Column="2" Content="Hz" />
+                </Grid>
+                <Grid Visibility="{Binding IsVisibleFrequency, Mode=OneWay}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="最大振動数" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding MaxFreq}" />
+                    <Label Grid.Column="2" Content="Hz" />
+                </Grid>
+                <Grid Visibility="{Binding IsVisiblePeriod, Mode=OneWay}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="最短周期" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding MinSec}" />
+                    <Label Grid.Column="2" Content="s" />
+                </Grid>
+                <Grid Visibility="{Binding IsVisiblePeriod, Mode=OneWay}" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="最長周期" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding MaxSec}" />
+                    <Label Grid.Column="2" Content="s" />
+                </Grid>
+                <Grid >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="3*"/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Label Content="分割数" Grid.Column="0" />
+                    <TextBox Grid.Column="1" Text="{Binding NumFrequency}" />
+                    <Label Grid.Column="2" Content="点" />
+                </Grid>
+            </StackPanel>
+        </Expander>
+        <Grid Height="20">
+            <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressRate}" />
+            <Viewbox>
+                <TextBlock TextAlignment="Center" Text="{Binding StatusText}" />
+            </Viewbox>
+        </Grid>
+    </StackPanel>
+</Window>

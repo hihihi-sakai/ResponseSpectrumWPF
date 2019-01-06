@@ -1,0 +1,118 @@
+﻿<Window x:Name="window" 
+        x:Class="WaveProcessWPF.ResultWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:oxy="http://oxyplot.org/wpf"
+        xmlns:o="clr-namespace:OxyPlot;assembly=OxyPlot"
+        xmlns:local="clr-namespace:WaveProcessWPF"
+        mc:Ignorable="d"
+        Title="Results" Icon="Favicon.ico" ResizeMode="CanResizeWithGrip" Height="600" Width="800">
+    <Window.Resources>
+        <local:EnumBooleanConverter x:Key="EnumBooleanConverter"/>
+        <local:LegendPositionConverter x:Key="LegendPositionConverter" />
+        <ContextMenu x:Key="PlotViewContextMenu" >
+            <MenuItem Header="クリップポードにコピー" Command="{Binding Context.CopyGraphCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}" CommandParameter="{Binding}" />
+            <MenuItem Header="ファイルに保存" Command="{Binding Context.ExportGraphCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}" CommandParameter="{Binding}" />
+            <Separator/>
+            <MenuItem Header="凡例の位置">
+                <MenuItem Header="左上" Command="{Binding Context.SetLegendPositionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}"                             >
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource LegendPositionConverter}">
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}" />
+                            <Binding Source="{x:Static o:LegendPosition.TopLeft}" />
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+                <MenuItem Header="右上" Command="{Binding Context.SetLegendPositionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}" >
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource LegendPositionConverter}">
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}" />
+                            <Binding Source="{x:Static o:LegendPosition.TopRight}" />
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+                <MenuItem Header="左下" Command="{Binding Context.SetLegendPositionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}" >
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource LegendPositionConverter}">
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}" />
+                            <Binding Source="{x:Static o:LegendPosition.BottomLeft}" />
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+                <MenuItem Header="右下" Command="{Binding Context.SetLegendPositionCommand, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type local:ResultWindow}}}" >
+                    <MenuItem.CommandParameter>
+                        <MultiBinding Converter="{StaticResource LegendPositionConverter}">
+                            <Binding Path="DataContext" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}" />
+                            <Binding Source="{x:Static o:LegendPosition.BottomRight}" />
+                        </MultiBinding>
+                    </MenuItem.CommandParameter>
+                </MenuItem>
+            </MenuItem>
+
+        </ContextMenu>
+    </Window.Resources>
+    <Window.DataContext>
+        <local:RespSpectrumViewModel/>
+    </Window.DataContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="3*"/>
+        </Grid.ColumnDefinitions>
+        
+        <Menu Grid.Row="0" Grid.ColumnSpan="3" VerticalAlignment="Top">
+            <MenuItem Header="テキストで保存" Command="{Binding SaveResultAsTextCommand}"/>
+            <MenuItem Header="CSVで保存" Command="{Binding SaveResultAsCsvCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"  />
+            <MenuItem Header="Excelで保存" Command="{Binding SaveResultAsExcelCommand}"/>
+            <MenuItem Header="Htmlで保存" Command="{Binding SaveResultAsHtmlCommand}" CommandParameter="{Binding ElementName=window, Mode=OneWay}"  />
+            <Separator />
+            <MenuItem Header="周期/周波数">
+                <MenuItem  Header="周期" IsChecked="{Binding PlotType, ConverterParameter=Second, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+                <MenuItem  Header="周波数" IsChecked="{Binding PlotType, ConverterParameter=Frequency, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+            </MenuItem>
+            <MenuItem Header="X軸の種類">
+                <MenuItem  Header="線形" IsChecked="{Binding XAxisType, ConverterParameter=Liner, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+                <MenuItem  Header="対数" IsChecked="{Binding XAxisType, ConverterParameter=Logarithmic, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+            </MenuItem>
+            <MenuItem Header="Y軸の種類">
+                <MenuItem  Header="線形" IsChecked="{Binding YAxisType, ConverterParameter=Liner, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+                <MenuItem  Header="対数" IsChecked="{Binding YAxisType, ConverterParameter=Logarithmic, Converter={StaticResource EnumBooleanConverter}, Mode=TwoWay}" IsCheckable="True"  />
+            </MenuItem>
+        </Menu>
+        <GridSplitter Width="5" Grid.Column="1" HorizontalAlignment="Center" Grid.Row="1"/>
+        <ListBox Name="WaveListbox" Grid.Column="0" ItemsSource="{Binding Results}"  SelectionMode="Multiple" Grid.Row="1">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox IsChecked="{Binding IsShow}" Content="{Binding NameWithH}" />
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <TabControl Grid.Column="2" Grid.Row="1" >
+            <TabItem Header="加速度">
+                <Grid >
+                    <oxy:PlotView DataContext="{Binding AccPlotModel}" Model="{Binding }" ContextMenu="{DynamicResource PlotViewContextMenu}"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="速度">
+                <Grid >
+                    <oxy:PlotView DataContext="{Binding VelPlotModel}" Model="{Binding }" ContextMenu="{DynamicResource PlotViewContextMenu}">
+                    </oxy:PlotView>
+                </Grid>
+            </TabItem>
+            <TabItem Header="変位">
+                <Grid >
+                    <oxy:PlotView DataContext="{Binding DispPlotModel}" Model="{Binding }" ContextMenu="{DynamicResource PlotViewContextMenu}">
+                    </oxy:PlotView>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+    </Grid>
+</Window>

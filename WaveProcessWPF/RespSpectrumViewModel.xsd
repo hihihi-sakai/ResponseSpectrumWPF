@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="RespSpectrumViewModel"
+           targetNamespace="http://tempuri.org/RespSpectrumViewModel.xsd"
+           xmlns="http://tempuri.org/RespSpectrumViewModel.xsd"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+           xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           attributeFormDefault="unqualified" 
+           elementFormDefault="qualified">
+  <xsd:element name="RespSpectrumViewModel">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="Hs">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element maxOccurs="unbounded" name="double" type="xsd:decimal" />
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="Waves">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element maxOccurs="unbounded" name="Wave">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Data">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element maxOccurs="unbounded" name="double" type="xsd:double" />
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="Name" type="xsd:string" />
+                    <xsd:element name="Dt" type="xsd:decimal" />
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+        <xsd:element name="Results">
+          <xsd:complexType>
+            <xsd:sequence>
+              <xsd:element maxOccurs="unbounded" name="SpectraViewModel">
+                <xsd:complexType>
+                  <xsd:sequence>
+                    <xsd:element name="Name" type="xsd:string" />
+                    <xsd:element name="H" type="xsd:decimal" />
+                    <xsd:element name="Dt" type="xsd:decimal" />
+                    <xsd:element name="Data">
+                      <xsd:complexType>
+                        <xsd:sequence>
+                          <xsd:element maxOccurs="unbounded" name="Spectrum">
+                            <xsd:complexType>
+                              <xsd:sequence>
+                                <xsd:element name="Frequency" type="xsd:decimal" />
+                                <xsd:element name="Second" type="xsd:decimal" />
+                                <xsd:element name="Acceleration" type="xsd:decimal" />
+                                <xsd:element name="Velocity" type="xsd:decimal" />
+                                <xsd:element name="Displacement" type="xsd:decimal" />
+                              </xsd:sequence>
+                            </xsd:complexType>
+                          </xsd:element>
+                        </xsd:sequence>
+                      </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="IsShow" type="xsd:boolean" />
+                  </xsd:sequence>
+                </xsd:complexType>
+              </xsd:element>
+            </xsd:sequence>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType>
+  </xsd:element>
+</xs:schema>
