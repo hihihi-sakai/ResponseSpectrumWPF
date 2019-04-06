@@ -902,7 +902,7 @@ namespace WaveProcessWPF
             //xslTrans.Transform(xmlfilename, outputFileName);
 
             ExtractResource($"{model.OutputFolder}\\{folderName}", "/Content/bootstrap.min.css");
-            ExtractResource($"{model.OutputFolder}\\{folderName}", "/Scripts/jquery-3.0.0.slim.min.js");
+            ExtractResource($"{model.OutputFolder}\\{folderName}", "/Scripts/jquery-3.3.1.slim.min.js");
             ExtractResource($"{model.OutputFolder}\\{folderName}", "/Scripts/bootstrap.bundle.min.js");
 
             outSw.Close();
